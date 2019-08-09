@@ -2,7 +2,7 @@
 # Geraldo Rabelo [geraldo.rabelo@gmail.com]; Ago 2019
 # 
 # how to use:
-# python tjam.py <pesquisa> <UF> <dtInicio> <dtFim>
+# python tj.py <pesquisa> <UF> <dtInicio> <dtFim>
 # 
 
 import requests, codecs, webbrowser, re, math, sys #, time
@@ -15,10 +15,7 @@ from bs4 import BeautifulSoup
 class consultaAvancada:
 
     session = Session()
-    # URLBASE = None
     client = MongoClient("mongodb://localhost:27017")
-    # db = None
-    # collection = None
     
     def __init__(self, pesquisaLivre, UF, dtInicio, dtFim):
         self.ocorrencias = 0
@@ -36,6 +33,9 @@ class consultaAvancada:
             self.collection = self.db['consultaAvancada']
             self.pesquisaLivre = pesquisaLivre
             self.start(self.getData(1))
+        else:
+            print("python tjam.py <pesquisa> <UF> <dtInicio> <dtFim>")
+            sys.exit()
 
         print('UF: ',self.UF, 'dtInicio: ', self.dtInicio,' dtFim: ',self.dtFim,' pesquisaLivre: ',self.pesquisaLivre,' ocorrencias: ',self.ocorrencias)
 
