@@ -1,7 +1,7 @@
-# botjam
+# courtscraper
   
 ##  objetivo  
-  recuperar autonomamente informações publicadas no diário oficial pelo tribunal de justiça do Amazonas.  
+  recuperar autonomamente informações publicadas nos diversos diários oficiais de justiça brasileiros.
   
   
   
