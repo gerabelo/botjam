@@ -2,10 +2,10 @@
 # Geraldo Rabelo [geraldo.rabelo@gmail.com]; Ago 2019
 # 
 # how to use:
-# python tj.py <pesquisa> <UF> <dtInicio> <dtFim>
+# python tjsp.py <pesquisa> <dtInicio> <dtFim>
 # 
 
-import requests, codecs, webbrowser, re, math, sys #, time
+import traceback, requests, codecs, webbrowser, re, math, sys #, time
 
 from datetime import timedelta, datetime
 from requests import Session
@@ -17,7 +17,7 @@ class consultaAvancada:
     session = Session()
     client = MongoClient("mongodb://localhost:27017")
     
-    def __init__(self, pesquisaLivre, UF, dtInicio, dtFim):
+    def __init__(self, pesquisaLivre, dtInicio, dtFim):
         self.ocorrencias = 0
         if dtInicio and dtFim:
             self.dtInicio = dtInicio
@@ -26,33 +26,32 @@ class consultaAvancada:
             self.dtFim = datetime.utcnow().strftime("%d/%m/%Y")
             date = datetime.utcnow()+timedelta(days=-365)
             self.dtInicio = str(date.strftime("%d/%m/%Y"))
-        if pesquisaLivre and UF:
-            self.UF = UF
-            self.URLBASE = "https://consultasaj.tj"+UF+".jus.br"
-            self.db = self.client['tj'+UF]
+        if pesquisaLivre:
+            self.URLBASE = "https://dje.tjsp.jus.br"
+            self.db = self.client['tjsp']
             self.collection = self.db['consultaAvancada']
             self.pesquisaLivre = pesquisaLivre
             self.start(self.getData(1))
         else:
-            print("python tj.py <pesquisa> <UF> <dtInicio> <dtFim>")
+            print("python tjsp.py <pesquisa> <dtInicio> <dtFim>")
             sys.exit()
 
-        print('UF: ',self.UF, 'dtInicio: ', self.dtInicio,' dtFim: ',self.dtFim,' pesquisaLivre: ',self.pesquisaLivre,' ocorrencias: ',self.ocorrencias)
+        print('dtInicio: ', self.dtInicio,' dtFim: ',self.dtFim,' pesquisaLivre: ',self.pesquisaLivre,' ocorrencias: ',self.ocorrencias)
 
-    def permanencia(self, data_descriptions):
+    def permanencia(self, data_descriptions,data_urls):
             i = 0
             self.ocorrencias += len(data_descriptions)
             while (i < self.ocorrencias):
                 try:
                     self.collection.insert_one({"description":data_descriptions[i],"url":data_urls[i*3],"dateCreated":datetime.utcnow().strftime("%d/%m/%Y-%H%M%S.%f")[:-3],"keywords":self.pesquisaLivre})
                 except:
-                    None
+                    None # traceback.print_exc()
                 i+=1
 
     def getData(self, pagina):
         if pagina == 1:
             page = ''
-            URL = "https://consultasaj.tj"+self.UF+".jus.br/cdje/consultaAvancada.do"    
+            URL = "https://dje.tjsp.jus.br/cdje/consultaAvancada.do"    
             DATA = {
                 'dadosConsulta.dtInicio'        : self.dtInicio,
                 'dadosConsulta.dtFim'           : self.dtFim,
@@ -69,15 +68,15 @@ class consultaAvancada:
             #     'Content-Length'            : '159',
             #     'Content-Type'              : 'application/x-www-form-urlencoded',
             #     'Cookie'                    : 'JSESSIONID=3A27459F6A5982C8104D0195374401F0.cdje1; _ga=GA1.3.2054290177.1564925011',
-            #     'Host'                      : 'consultasaj.tjam.jus.br',
-            #     'Origin'                    : 'https://consultasaj.tjam.jus.br',
-            #     'Referer'                   : 'https://consultasaj.tjam.jus.br/cdje/consultaAvancada.do',
+            #     'Host'                      : 'consultasaj.tjsp.jus.br',
+            #     'Origin'                    : 'https://dje.tjsp.jus.br',
+            #     'Referer'                   : 'https://dje.tjsp.jus.br/cdje/consultaAvancada.do',
             #     'Upgrade-Insecure-Requests' : '1',
             #     'User-Agent'                : 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36'
             # }
         else:
             page = str(pagina)
-            URL = "https://consultasaj.tj"+self.UF+".jus.br/cdje/trocaDePagina.do"    
+            URL = "https://dje.tjsp.jus.br/cdje/trocaDePagina.do"    
             DATA = {
                 'pagina'                        : page,
                 '_'                             : ''
@@ -90,9 +89,9 @@ class consultaAvancada:
             #     'Content-Length'            : '11',
             #     'Content-type'              : 'application/x-www-form-urlencoded; charset=UTF-8',
             #     'Cookie'                    : 'JSESSIONID=3A27459F6A5982C8104D0195374401F0.cdje1; _ga=GA1.3.2054290177.1564925011',
-            #     'Host'                      : 'consultasaj.tjam.jus.br',
-            #     'Origin'                    : 'https://consultasaj.tjam.jus.br',
-            #     'Referer'                   : 'https://consultasaj.tjam.jus.br/cdje/consultaAvancada.do',
+            #     'Host'                      : 'consultasaj.tjsp.jus.br',
+            #     'Origin'                    : 'https://dje.tjsp.jus.br',
+            #     'Referer'                   : 'https://dje.tjsp.jus.br/cdje/consultaAvancada.do',
             #     'User-Agent'                : 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36',
             #     'X-Prototype-Version'       : '1.6.0.3',
             #     'X-Requested-With'          : 'XMLHttpRequest'
@@ -123,7 +122,7 @@ class consultaAvancada:
             for td in item.findAll("td",recursive=False):
                     data_descriptions.append(td.text)
                     
-        self.permanencia(data_descriptions)
+        self.permanencia(data_descriptions,data_urls)
 
     def start(self, data):
         data_descriptions = []
@@ -155,17 +154,17 @@ class consultaAvancada:
         numbers = re.findall(r'\d+',td.text.replace("\t","").replace("\n","").replace(" ",""))
         total_de_paginas = math.ceil(int(numbers[2])/int(numbers[1]))
 
-        self.permanencia(data_descriptions)
+        self.permanencia(data_descriptions,data_urls)
         
         while (total_de_paginas > 1):
             self.parsing(self.getData(total_de_paginas))
             total_de_paginas -= 1
 
-if (len(sys.argv) == 5):
-    consultaAvancada(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
-elif (len(sys.argv) == 4):
-        consultaAvancada(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[3])
+if (len(sys.argv) == 4):
+    consultaAvancada(sys.argv[1], sys.argv[2], sys.argv[3])
 elif (len(sys.argv) == 3):
-        consultaAvancada(sys.argv[1], sys.argv[2], '', '')
+        consultaAvancada(sys.argv[1], sys.argv[2], sys.argv[2])
+elif (len(sys.argv) == 2):
+        consultaAvancada(sys.argv[1], '', '')
 else:
-    print("python tj.py <pesquisa> <UF> <dtInicio> <dtFim>")
+    print("python tjsp.py <pesquisa> <dtInicio> <dtFim>")
