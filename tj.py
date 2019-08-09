@@ -34,7 +34,7 @@ class consultaAvancada:
             self.pesquisaLivre = pesquisaLivre
             self.start(self.getData(1))
         else:
-            print("python tjam.py <pesquisa> <UF> <dtInicio> <dtFim>")
+            print("python tj.py <pesquisa> <UF> <dtInicio> <dtFim>")
             sys.exit()
 
         print('UF: ',self.UF, 'dtInicio: ', self.dtInicio,' dtFim: ',self.dtFim,' pesquisaLivre: ',self.pesquisaLivre,' ocorrencias: ',self.ocorrencias)
@@ -52,7 +52,7 @@ class consultaAvancada:
     def getData(self, pagina):
         if pagina == 1:
             page = ''
-            URL = "https://consultasaj.tjam.jus.br/cdje/consultaAvancada.do"    
+            URL = "https://consultasaj.tj"+self.UF+".jus.br/cdje/consultaAvancada.do"    
             DATA = {
                 'dadosConsulta.dtInicio'        : self.dtInicio,
                 'dadosConsulta.dtFim'           : self.dtFim,
@@ -77,7 +77,7 @@ class consultaAvancada:
             # }
         else:
             page = str(pagina)
-            URL = "https://consultasaj.tjam.jus.br/cdje/trocaDePagina.do"    
+            URL = "https://consultasaj.tj"+self.UF+".jus.br/cdje/trocaDePagina.do"    
             DATA = {
                 'pagina'                        : page,
                 '_'                             : ''
@@ -97,11 +97,8 @@ class consultaAvancada:
             #     'X-Prototype-Version'       : '1.6.0.3',
             #     'X-Requested-With'          : 'XMLHttpRequest'
             # }
-
         # result = session.post(url = URL, data = DATA, headers = HEADERS)
         result = self.session.post(url = URL, data = DATA)
-        # print("[PAGE]: ",page)
-        # print(result.text)
         return result.text
 
     def parsing(self, data):
@@ -132,18 +129,12 @@ class consultaAvancada:
         data_descriptions = []
         data_urls = []    
 
-        # file = codecs.open("C:\\Users\\User\\jobs\\botjam\\out\\20190806-203556.html","r","utf-8")
-        # data = file.read()
-        # file.close()
-
         soup = BeautifulSoup(data,'html.parser')
-        # soup = BeautifulSoup(data,'html.parser')
 
         divResultadosInferior = soup.find("div",{"id":"divResultadosInferior"})
         outfile = "out\\"+datetime.utcnow().strftime("%Y%m%d-%H%M%S.%f")[:-3]+".html"
         file = codecs.open(outfile, "w", "utf-8")
         file.write(str(divResultadosInferior))
-        # file.write(response.text)
         file.close()
 
         # webbrowser.open_new(outfile)
@@ -177,4 +168,4 @@ elif (len(sys.argv) == 4):
 elif (len(sys.argv) == 3):
         consultaAvancada(sys.argv[1], sys.argv[2], '', '')
 else:
-    print("python tjam.py <pesquisa> <UF> <dtInicio> <dtFim>")
+    print("python tj.py <pesquisa> <UF> <dtInicio> <dtFim>")
