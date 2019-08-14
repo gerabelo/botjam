@@ -1,7 +1,8 @@
-import time, sys, os
+import time, sys, os, PyPDF2, textract
 from datetime import datetime
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
+# from tika import parser
 
 class downloader:
 
@@ -17,6 +18,24 @@ class downloader:
             os.makedirs(self.download_dir)
 
         self.run()
+
+    def extractPdfText(self,pdf_object):
+        print(pdf_object)
+        pdfFileReader = PyPDF2.PdfFileReader(pdf_object)
+        totalPageNumber = pdfFileReader.numPages
+        print('This pdf file contains totally ' + str(totalPageNumber) + ' pages.')
+        currentPageNumber = 1
+        text = ''
+        while(currentPageNumber < totalPageNumber ):
+            pdfPage = pdfFileReader.getPage(currentPageNumber)
+            text = text + pdfPage.extractText()
+            currentPageNumber += 1
+
+        if(text == ''):
+            # If can not extract text then use ocr lib to extract the scanned pdf file.
+            text = textract.process(pdf_object, method='tesseract', encoding='utf-8')
+        # print('text: ',text)
+        return text
 
     def run(self):
         self.options = webdriver.ChromeOptions()
@@ -41,9 +60,24 @@ class downloader:
         self.driver.close()
         self.driver.stop_client()
         self.driver.quit()
-        os.rename(self.download_dir+"\\"+self.file_name,self.download_dir+"\\"+self.file_local)
 
-        exit()
+        try:
+        # pdf_object = open(self.download_dir+"\\"+self.file_name, 'rb') # fileObject = open("C:\\Users\\User\\jobs\\courtscraper\\pdf\\24\A\\test.pdf", 'rb')        
+        # txt = open(self.download_dir+"\\"+self.file_name+".txt","w+")
+        # txt.write(self.extractPdfText(pdf_object)) #print(self.extractPdfText(self.download_dir+"\\"+self.file_name))
+        # pdf_object.close()
+        # txt.close()
+            os.rename(self.download_dir+"\\"+self.file_name,self.download_dir+"\\"+self.file_local)
+
+            pdf_object = open(self.download_dir+"\\"+self.file_local, 'rb') # fileObject = open("C:\\Users\\User\\jobs\\courtscraper\\pdf\\24\A\\test.pdf", 'rb')        
+            txt = open(self.download_dir+"\\"+self.file_local+".txt","w+")
+            txt.write(self.extractPdfText(pdf_object)) #print(self.extractPdfText(self.download_dir+"\\"+self.file_name))
+            pdf_object.close()
+            txt.close()
+
+        # raw = parser.from_file(self.download_dir+"\\"+self.file_local)
+        except:
+            None
 
 if (len(sys.argv) == 3):
     downloader(sys.argv[1], sys.argv[2])
