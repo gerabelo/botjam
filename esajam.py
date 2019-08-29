@@ -1,4 +1,4 @@
-import time, argparse, urllib.parse
+import time, argparse, urllib.parse, re
 
 from datetime import datetime
 from selenium import webdriver
@@ -6,6 +6,12 @@ from selenium.webdriver.common.keys import Keys
 # from fake_useragent import UserAgent
 from time import sleep
 from pymongo import MongoClient
+
+def lreplace(pattern, sub, string):
+    return re.sub('^%s' % pattern, sub, string)
+
+def rreplace(pattern, sub, string):
+    return re.sub('%s$' % pattern, sub, string)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='e-SAJ TJAM Scraper be geraldo.rabelo@gmail.com (Ago/2019)')
@@ -70,11 +76,15 @@ if __name__ == "__main__":
 
     movimentacao = [[],[]]
     for i,j in zip(dataMovimentacao,descricaoMovimentacao):
-        data = i.get_attribute("innerText").replace('\n','').replace('\t','')
-        desc = j.get_attribute("innerText").replace('\n','').replace('\t','')
+        data = i.get_attribute("innerText").replace('\n','').replace('\t','').replace('  ',' ')
+        data = lreplace(' ','',data)
+        data = rreplace(' ','',data)
+        desc = j.get_attribute("innerText").replace('\n','').replace('\t','').replace('  ',' ')
+        desc = lreplace(' ','',desc)
+        desc = rreplace(' ','',desc)
         print(data,' ',desc)
-        movimentacao[0].append(i.get_attribute("innerText"))
-        movimentacao[1].append(j.get_attribute("innerText"))
+        movimentacao[0].append(data)
+        movimentacao[1].append(desc)
 
     collection.insert_one({
         "classe":classeProcesso.get_attribute("innerText"),
@@ -85,6 +95,7 @@ if __name__ == "__main__":
         "movimentacao":movimentacao
         })
 
-
+    driver.stop_client()
+    driver.close()
     # id=linkPasta #Visualizar autos
 
