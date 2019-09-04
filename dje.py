@@ -88,8 +88,9 @@ class downloader:
         self.driver.stop_client()
         self.driver.quit()
 
-        try:
-            txtpath = ''
+        txtpath = ''
+
+        try:    
             if self.cdCaderno == '2':
                 pdf_object = open(self.download_dir+"\\Caderno2-Judiciario-Capital.pdf", 'rb')
                 txtpath = self.download_dir+"\\Caderno2-Judiciario-Capital.txt"

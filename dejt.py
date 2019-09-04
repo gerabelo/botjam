@@ -96,7 +96,7 @@ class downloader:
             
             txt.close()
             pdf_object.close()
-            self.extractProcAndOAB(txtpath)
+            self.extractProcAndOAB(self.download_dir+"\\"+self.file_name+".txt")
 
             os.rename(self.download_dir+"\\"+self.file_name,self.download_dir+"\\"+self.file_local)
             os.rename(self.download_dir+"\\"+self.file_name+".txt",self.download_dir+"\\"+self.file_local+".txt")
