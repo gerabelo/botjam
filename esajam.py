@@ -1,7 +1,7 @@
 '''
 e-SAJ TJAM Scraper be geraldo.rabelo@gmail.com (Ago/2019)
 
-\python esajam.py 00749693231 lucy1525 processos.txt
+\python esajam.py username password processos.txt
 
 0606426-45.2019.8.04.0092
     0606426-45.2019 Processo
