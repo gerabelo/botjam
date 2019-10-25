@@ -72,7 +72,9 @@ class downloader:
 
         self.options.add_experimental_option("prefs", self.profile)
 
-        self.driver = webdriver.Chrome(self.chrome_driver, chrome_options=self.options)
+        # self.driver = webdriver.Chrome(self.chrome_driver, chrome_options=self.options)
+        self.driver = webdriver.Chrome(self.chrome_driver, options=self.options)        
+
 
         self.driver.get(self.url+"dtDiario="+self.dtDiario+"&cdCaderno="+self.cdCaderno+"&tpDownload="+self.tpDownload)
 
@@ -81,8 +83,15 @@ class downloader:
                 self.file_checker = open(self.download_dir+"\\Caderno2-Judiciario-Capital.pdf", "r+")
                 break
             except IOError:
-                time.sleep(10)
-                
+                if "Erro" in self.driver.find_element_by_tag_name('body').get_attribute("innerTEXT"):
+                    self.file_checker.close()
+                    self.driver.close()
+                    self.driver.stop_client()
+                    self.driver.quit()
+                    exit()
+                else:
+                    time.sleep(10)
+
         self.file_checker.close()
         self.driver.close()
         self.driver.stop_client()

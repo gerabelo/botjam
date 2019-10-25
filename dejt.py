@@ -1,4 +1,4 @@
-import time, sys, os, PyPDF2, textract
+import time, sys, os, PyPDF2, textract, re
 from datetime import datetime
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
@@ -60,14 +60,24 @@ class downloader:
         return text
 
     def run(self):
+        
+        # self.options = webdriver.ChromeOptions()
+
+        # self.profile = {"plugins.plugins_list": [{"enabled": False, "name": "Chrome PDF Viewer"}], # Disable Chrome's PDF Viewer
+        #        "download.default_directory": self.download_dir , "download.extensions_to_open": "applications/pdf"}
+
+        # self.options.add_experimental_option("prefs", self.profile)
+        # # self.driver = webdriver.Chrome(self.chrome_driver, chrome_options=self.options)  # Optional argument, if not specified will search path.
+        # self.driver = webdriver.Chrome(self.chrome_driver, options=self.options)  # Optional argument, if not specified will search path.
+
         self.options = webdriver.ChromeOptions()
+        self.options.add_experimental_option('prefs', { "download.default_directory": self.download_dir, #Change default directory for downloads
+         "download.prompt_for_download": False, #To auto download the file
+         "download.directory_upgrade": True, "plugins.always_open_pdf_externally": True #It will not show PDF directly in chrome
+          })
+        self.driver = webdriver.Chrome(options=self.options)
 
-        self.profile = {"plugins.plugins_list": [{"enabled": False, "name": "Chrome PDF Viewer"}], # Disable Chrome's PDF Viewer
-               "download.default_directory": self.download_dir , "download.extensions_to_open": "applications/pdf"}
 
-        self.options.add_experimental_option("prefs", self.profile)
-
-        self.driver = webdriver.Chrome(self.chrome_driver, chrome_options=self.options)  # Optional argument, if not specified will search path.
 
         self.driver.get(self.url+self.file_name)
 
